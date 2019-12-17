@@ -42,25 +42,24 @@ object Main {
     RawNode(id, name, index, col, ListBuffer[RawNode]())
   }
 
-  def createTree(list: List[RawNode]): Unit = {
-    @tailrec
-    def appendNodes(parent: RawNode, list: List[RawNode]): Unit = {
-      list match {
-        case List() => Nil
-        case List(x) => x
-        case head :: xs =>
-          if (parent.col + 1 == head.col) {
-            parent.nodes.addOne(head)
-          }
-          //if next nodes from the list are in the same column, then pass parent
-          //because there will be no children for head
-          if (head.col == xs.head.col) {
-            appendNodes(parent, xs)
-          } else {
-            appendNodes(head, xs)
-          }
-      }
+  def createTree(list: List[RawNode]): List[Node] = {
+    val byCol = list.groupBy(node => node.col)
+    addChildren(byCol(0), byCol(1))
+    addChildren(byCol(1), byCol(2))
+
+    List[Node]()
+  }
+
+  @tailrec
+  def addChildren(parents: List[RawNode], children: List[RawNode]): Unit = {
+    parents match {
+      case List(x) =>
+        val nodes = children.filter(node => node.row > x.row)
+        x.nodes.addAll(nodes)
+      case x :: xs =>
+        val nodes = children.filter(node => node.row > x.row && node.row < xs.head.row)
+        x.nodes.addAll(nodes)
+        addChildren(xs, children)
     }
-    appendNodes(list.head, list.tail)
   }
 }
