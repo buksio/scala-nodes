@@ -46,12 +46,19 @@ object Main {
     @tailrec
     def appendNodes(parent: RawNode, list: List[RawNode]): Unit = {
       list match {
-        case head :: xs => {
+        case List() => Nil
+        case List(x) => x
+        case head :: xs =>
           if (parent.col + 1 == head.col) {
             parent.nodes.addOne(head)
+          }
+          //if next nodes from the list are in the same column, then pass parent
+          //because there will be no children for head
+          if (head.col == xs.head.col) {
+            appendNodes(parent, xs)
+          } else {
             appendNodes(head, xs)
           }
-        }
       }
     }
     appendNodes(list.head, list.tail)
