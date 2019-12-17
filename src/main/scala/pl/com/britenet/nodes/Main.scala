@@ -3,12 +3,11 @@ package pl.com.britenet.nodes
 import org.apache.poi.ss.usermodel.{CellType, Row, WorkbookFactory}
 
 import scala.annotation.tailrec
-import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 
 case class Node(id: Int, name: String, nodes: List[Node])
 
-case class RawNode(id: Int, name: String, row: Int, col: Int, nodes: ListBuffer[RawNode])
+case class RawNode(id: Int, name: String, row: Int, col: Int)
 
 object Main {
   def main(args: Array[String]): Unit = {
@@ -39,27 +38,29 @@ object Main {
     val name = cellAndIndex._1.getStringCellValue
     val col = cellAndIndex._2
 
-    RawNode(id, name, index, col, ListBuffer[RawNode]())
+    RawNode(id, name, index, col)
   }
 
   def createTree(list: List[RawNode]): List[Node] = {
     val byCol = list.groupBy(node => node.col)
-    addChildren(byCol(0), byCol(1))
-    addChildren(byCol(1), byCol(2))
+
+    val value = addChildren(byCol(0), byCol(1))
 
     List[Node]()
   }
 
-  @tailrec
-  def addChildren(parents: List[RawNode], children: List[RawNode]): Unit = {
+  def addChildren(parents: List[RawNode], children: List[RawNode]): List[Node] = {
     parents match {
       case List(x) =>
         val nodes = children.filter(node => node.row > x.row)
-        x.nodes.addAll(nodes)
+        List[Node](Node(x.id, x.name, nodes.map(node => mapRawNode(node))))
       case x :: xs =>
         val nodes = children.filter(node => node.row > x.row && node.row < xs.head.row)
-        x.nodes.addAll(nodes)
-        addChildren(xs, children)
+        Node(x.id, x.name, nodes.map(node => mapRawNode(node))) :: addChildren(xs, children)
     }
+  }
+
+  def mapRawNode(rawNode: RawNode): Node = {
+    Node(rawNode.id, rawNode.name, List[Node]())
   }
 }
