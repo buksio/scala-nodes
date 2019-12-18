@@ -6,7 +6,7 @@ import scala.jdk.CollectionConverters._
 
 class Reader {
   def read(): List[Row] = {
-    //depth and path to file can be parameterized
+    //path to file can be parameterized in get request if needed
 
     val source = getClass.getClassLoader.getResourceAsStream("test1.xlsx")
     val workbook = WorkbookFactory.create(source)

@@ -1,87 +1,26 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Zadanie FE</title>
-    <link rel="stylesheet" href="./theme/style.min.css" />
-  </head>
-  <body>
-    <div id="tree"></div>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="./jstree.min.js"></script>
-    <script>
+<head>
+  <meta charset="utf-8" />
+  <title>Zadanie FE</title>
+  <link rel="stylesheet" href="./theme/style.min.css" />
+</head>
+
+<body>
+  <div id="tree"></div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="./jstree.min.js"></script>
+  <script>
+    $.get("http://localhost:8080/tree", function (data, status) {
       $("#tree").jstree({
         core: {
-          data: [
-            {
-              id: 1,
-              text: "A",
-              children: [
-                {
-                  id: 2,
-                  text: "AA",
-                  children: [
-                    {
-                      id: 3,
-                      text: "AA1",
-                      children: []
-                    },
-                    {
-                      id: 4,
-                      text: "AA2",
-                      children: []
-                    }
-                  ]
-                },
-                {
-                  id: 5,
-                  text: "AB",
-                  children: []
-                }
-              ]
-            },
-            {
-              id: 6,
-              text: "B",
-              children: []
-            },
-            {
-              id: 7,
-              text: "C",
-              children: [
-                {
-                  id: 8,
-                  text: "CA",
-                  children: [
-                    {
-                      id: 9,
-                      text: "CA1",
-                      children: []
-                    },
-                    {
-                      id: 10,
-                      text: "CA2",
-                      children: []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              id: 11,
-              text: "D",
-              children: [
-                {
-                  id: 12,
-                  text: "DA",
-                  children: []
-                }
-              ]
-            }
-          ]
+          data: data
         }
       });
-    </script>
-  </body>
+    });
+  </script>
+</body>
+
 </html>
