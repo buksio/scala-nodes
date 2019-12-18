@@ -33,7 +33,6 @@ class Orphanage {
 
   private def mapRawNodes(rows: List[Row]): List[RawNode] = {
     val isRowANode = (row: Row) => row.getCell(3).getCellType == CellType.NUMERIC
-
     rows.filter(isRowANode).zipWithIndex.map {
       case (row, index) => mapRow(row, index)
     }
