@@ -1,19 +1,11 @@
 package pl.com.britenet.nodes
 
+import net.liftweb.json.{DefaultFormats, Serialization}
 import org.apache.poi.ss.usermodel.{CellType, Row, WorkbookFactory}
 
 import scala.jdk.CollectionConverters._
 
-trait Printable {
-  def print(): Unit
-}
-
-case class Node(id: Int, name: String, nodes: List[Node]) extends Printable {
-  def print(): Unit = {
-    println(id, name)
-    nodes.foreach(node => node.print())
-  }
-}
+case class Node(id: Int, name: String, nodes: List[Node])
 
 case class RawNode(id: Int, name: String, row: Int, col: Int)
 
@@ -27,11 +19,12 @@ object Main {
     val rawNodes = mapper.mapRawNodes(workbook.getSheetAt(0).iterator().asScala.toList)
     val families = mapper.createFamily(rawNodes.groupBy(node => node.col)(0), rawNodes)
 
-    println(families)
+    implicit val formats = DefaultFormats
+    println(Serialization.writePretty(families))
   }
 }
 
-class Mapper() {
+class Mapper {
 
   def mapRawNodes(rows: List[Row]): List[RawNode] = {
     val isRowANode = (row: Row) => row.getCell(3).getCellType == CellType.NUMERIC
