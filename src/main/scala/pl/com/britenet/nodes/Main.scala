@@ -1,5 +1,7 @@
 package pl.com.britenet.nodes
 
+import java.io.File
+
 import net.liftweb.json.{DefaultFormats, Serialization}
 import org.apache.poi.ss.usermodel.{CellType, Row, WorkbookFactory}
 
@@ -11,12 +13,15 @@ case class RawNode(id: Int, name: String, row: Int, col: Int)
 
 object Main {
   def main(args: Array[String]): Unit = {
-    val source = getClass.getClassLoader.getResourceAsStream("test1.xlsx")
-    val workbook = WorkbookFactory.create(source)
+    if (args.isEmpty || args.length < 2) {
+      throw new RuntimeException("Must provide path (String) and depth (Int)")
+    }
 
+    val workbook = WorkbookFactory.create(new File(args(0)))
     val orphanage = new Orphanage
 
-    val families = orphanage.createFamilies(workbook.getSheetAt(0).iterator().asScala.toList)
+    val listOfRows = workbook.getSheetAt(0).iterator.asScala.toList
+    val families = orphanage.createFamilies(listOfRows, args(1).toInt)
 
     implicit val formats: DefaultFormats.type = DefaultFormats
     println(Serialization.writePretty(families))
@@ -25,16 +30,16 @@ object Main {
 
 class Orphanage {
 
-  def createFamilies(list: List[Row]): List[Node] = {
-    val all = this.mapRawNodes(list)
+  def createFamilies(list: List[Row], depth: Int): List[Node] = {
+    val all = this.mapRawNodes(list, depth)
     val parents = all.groupBy(node => node.col)(0)
     createFamily(parents, all)
   }
 
-  private def mapRawNodes(rows: List[Row]): List[RawNode] = {
-    val isRowANode = (row: Row) => row.getCell(3).getCellType == CellType.NUMERIC
+  private def mapRawNodes(rows: List[Row], depth: Int): List[RawNode] = {
+    val isRowANode = (row: Row) => row.getCell(depth).getCellType == CellType.NUMERIC
     rows.filter(isRowANode).zipWithIndex.map {
-      case (row, index) => mapRow(row, index)
+      case (row, index) => mapRow(row, index, depth)
     }
   }
 
@@ -54,7 +59,7 @@ class Orphanage {
     if (nextParent.isEmpty)
       orphanedChildren.filter(child => isNextGen(parent, child) && isAfter(parent, child))
     else
-      orphanedChildren.filter(child => isNextGen(parent, child) && isBefore(nextParent.get, child) && isAfter(parent, child))
+      orphanedChildren.filter(child => isNextGen(parent, child) && isAfter(parent, child) && isBefore(nextParent.get, child))
   }
 
   private def isNextGen(parent: RawNode, child: RawNode): Boolean = {
@@ -69,8 +74,8 @@ class Orphanage {
     parent.row < child.row
   }
 
-  private def mapRow(row: Row, index: Int): RawNode = {
-    val id = row.getCell(3).getNumericCellValue.intValue
+  private def mapRow(row: Row, index: Int, depth: Int): RawNode = {
+    val id = row.getCell(depth).getNumericCellValue.intValue
 
     val cellAndIndex = row.cellIterator().asScala.toList.zipWithIndex.find {
       case (cell, _) => cell.getCellType == CellType.STRING
