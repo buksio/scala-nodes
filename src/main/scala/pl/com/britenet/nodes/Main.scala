@@ -14,18 +14,16 @@ object Main {
     val source = getClass.getClassLoader.getResourceAsStream("test1.xlsx")
     val workbook = WorkbookFactory.create(source)
 
-    val mapper = new Mapper
+    val orphanage = new Orphanage
 
-    val rawNodes = mapper.mapRawNodes(workbook.getSheetAt(0).iterator().asScala.toList)
-    val families = mapper.createFamily(rawNodes.groupBy(node => node.col)(0), rawNodes)
+    val families = orphanage.createFamilies(workbook.getSheetAt(0).iterator().asScala.toList)
 
     implicit val formats: DefaultFormats.type = DefaultFormats
     println(Serialization.writePretty(families))
   }
 }
 
-class Mapper {
-
+class Orphanage {
   def mapRawNodes(rows: List[Row]): List[RawNode] = {
     val isRowANode = (row: Row) => row.getCell(3).getCellType == CellType.NUMERIC
 
@@ -34,6 +32,11 @@ class Mapper {
     }
   }
 
+  def createFamilies(list: List[Row]): List[Node] = {
+    val list = this.mapRawNodes(list)
+    val parents = list.groupBy(node => node.col)(0)
+    createFamily(parents, list)
+  }
 
   def createFamily(parents: List[RawNode], orphanedChildren: List[RawNode]): List[Node] = {
     parents match {
