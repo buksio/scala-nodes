@@ -24,13 +24,6 @@ object Main {
 }
 
 class Orphanage {
-  def mapRawNodes(rows: List[Row]): List[RawNode] = {
-    val isRowANode = (row: Row) => row.getCell(3).getCellType == CellType.NUMERIC
-
-    rows.filter(isRowANode).zipWithIndex.map {
-      case (row, index) => mapRow(row, index)
-    }
-  }
 
   def createFamilies(list: List[Row]): List[Node] = {
     val all = this.mapRawNodes(list)
@@ -38,7 +31,15 @@ class Orphanage {
     createFamily(parents, all)
   }
 
-  def createFamily(parents: List[RawNode], orphanedChildren: List[RawNode]): List[Node] = {
+  private def mapRawNodes(rows: List[Row]): List[RawNode] = {
+    val isRowANode = (row: Row) => row.getCell(3).getCellType == CellType.NUMERIC
+
+    rows.filter(isRowANode).zipWithIndex.map {
+      case (row, index) => mapRow(row, index)
+    }
+  }
+
+  private def createFamily(parents: List[RawNode], orphanedChildren: List[RawNode]): List[Node] = {
     parents match {
       case List() => List[Node]()
       case List(x) =>
