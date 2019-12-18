@@ -33,9 +33,9 @@ class Orphanage {
   }
 
   def createFamilies(list: List[Row]): List[Node] = {
-    val list = this.mapRawNodes(list)
-    val parents = list.groupBy(node => node.col)(0)
-    createFamily(parents, list)
+    val all = this.mapRawNodes(list)
+    val parents = all.groupBy(node => node.col)(0)
+    createFamily(parents, all)
   }
 
   def createFamily(parents: List[RawNode], orphanedChildren: List[RawNode]): List[Node] = {
