@@ -19,7 +19,7 @@ object Main {
     val rawNodes = mapper.mapRawNodes(workbook.getSheetAt(0).iterator().asScala.toList)
     val families = mapper.createFamily(rawNodes.groupBy(node => node.col)(0), rawNodes)
 
-    implicit val formats = DefaultFormats
+    implicit val formats: DefaultFormats.type = DefaultFormats
     println(Serialization.writePretty(families))
   }
 }
@@ -39,9 +39,9 @@ class Mapper {
     parents match {
       case List() => List[Node]()
       case List(x) =>
-    List[Node](Node(x.id, x.name, createFamily(assignChildren(x, orphanedChildren), orphanedChildren)))
+        List[Node](Node(x.id, x.name, createFamily(assignChildren(x, orphanedChildren), orphanedChildren)))
       case x :: xs =>
-    Node(x.id, x.name, createFamily(assignChildren(x, orphanedChildren), orphanedChildren)) :: createFamily(xs, orphanedChildren)
+        Node(x.id, x.name, createFamily(assignChildren(x, orphanedChildren), orphanedChildren)) :: createFamily(xs, orphanedChildren)
     }
   }
 
@@ -49,20 +49,20 @@ class Mapper {
     val nextParent = orphanedChildren.find(x => x.col == parent.col && x.row > parent.row)
 
     if (nextParent.isEmpty)
-    orphanedChildren.filter(child => isNextGen(parent, child) && isAfter(parent, child))
+      orphanedChildren.filter(child => isNextGen(parent, child) && isAfter(parent, child))
     else
-    orphanedChildren.filter(child => isNextGen(parent, child) && isBefore(nextParent.get, child) && isAfter(parent, child))
+      orphanedChildren.filter(child => isNextGen(parent, child) && isBefore(nextParent.get, child) && isAfter(parent, child))
   }
 
-  private def isNextGen(parent:RawNode, child:RawNode): Boolean = {
+  private def isNextGen(parent: RawNode, child: RawNode): Boolean = {
     parent.col + 1 == child.col
   }
 
-  private def isBefore(parent:RawNode, child:RawNode): Boolean = {
+  private def isBefore(parent: RawNode, child: RawNode): Boolean = {
     parent.row > child.row
   }
 
-  private def isAfter(parent:RawNode, child:RawNode): Boolean = {
+  private def isAfter(parent: RawNode, child: RawNode): Boolean = {
     parent.row < child.row
   }
 
